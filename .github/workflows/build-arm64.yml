@@ -83,13 +83,13 @@ jobs:
           p = Path("source/scripts/build-android-arm64.sh")
           s = p.read_text()
           dep = "github.com/apernet/hysteria/pkg/pktconns@v1.3.1-0.20221123081517-9eb0ea4367f3"
-          quic = "github.com/lucas-clemente/quic-go@v0.31.0"
+          quic = "github.com/lucas-clemente/quic-go@v0.30.0"
           if dep in s and quic not in s:
               s = s.replace(dep, dep + " " + quic)
           s = s.replace(
               '# Pin the official Hysteria 2 core and its matching extras API.\n(cd core && go get ',
               '# Pin the official Hysteria 2 core and its matching extras API.\n'
-              '(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/apernet/quic-go@v0.31.0)\n'
+              '(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/lucas-clemente/quic-go@v0.30.0)\n'
               '(cd core && go get '
           )
           p.write_text(s)
