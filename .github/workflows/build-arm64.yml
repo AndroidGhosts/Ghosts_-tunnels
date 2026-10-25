@@ -73,6 +73,43 @@ jobs:
                             "import com.google.android.material.button.MaterialButton\n" + imp)
           p.write_text(s)
 
+          # Apply native build cleanup and unit tests after the Hysteria 2 module is pinned.
+          script = Path("source/scripts/build-android-arm64.sh")
+          build = script.read_text()
+          anchor = '(cd core && go get github.com/apernet/hysteria/core/v2@v2.13.0 github.com/apernet/hysteria/extras/v2@v2.13.0)\\nMOBILE_VERSION="$(cd core && go list -m -f \'{{.Version}}\' golang.org/x/mobile)"'
+          addition = anchor + "\\n(cd core && go mod tidy)\\n(cd core && go test ./engine ./ghostcore)"
+          if "go mod tidy" not in build:
+              if anchor not in build:
+                  raise SystemExit("Could not locate Go dependency setup in build-android-arm64.sh")
+              build = build.replace(anchor, addition, 1)
+              script.write_text(build)
+
+          # Validate protocol-specific config without constructing a DNSTT tunnel for Hysteria 2.
+          core = Path("source/core/ghostcore/ghostcore.go")
+          c = core.read_text()
+          old_check = "if err == nil {\\n\\t\\t_, err = engine.NewTunnel(cfg)\\n\\t}"
+          new_check = "// NewTunnel is the DNSTT backend; Hysteria 2 validates statically in ParseConfig.\\n\\tif err == nil && cfg.Protocol == \"dnstt\" {\\n\\t\\t_, err = engine.NewTunnel(cfg)\\n\\t}"
+          if old_check in c:
+              c = c.replace(old_check, new_check, 1)
+              core.write_text(c)
+          elif new_check not in c:
+              raise SystemExit("Could not locate CheckConfig backend validation in ghostcore.go")
+
+          profile_activity = Path("source/app/src/main/java/com/androidghosts/dnsttghosts/ProfileEditActivity.kt")
+          s = profile_activity.read_text()
+          old_save = 'if (out.optString("protocol", "dnstt") == "dnstt") {'
+          new_save = 'val activeProtocol = out.optString("protocol", "dnstt")\\n            if (activeProtocol == "dnstt" || activeProtocol == "hysteria2") {'
+          if old_save in s:
+              s = s.replace(old_save, new_save, 1)
+              profile_activity.write_text(s)
+          elif "activeProtocol == \"dnstt\" || activeProtocol == \"hysteria2\"" not in s:
+              raise SystemExit("Could not locate profile validation handler")
+
+          strings = Path("source/app/src/main/res/values/strings.xml")
+          t = strings.read_text()
+          t = t.replace("This profile format is supported, but its connection engine is not integrated in this build. Only DNSTT can connect right now.", "This profile format can be saved, but its connection engine is not integrated in this build. Active engines: DNSTT and Hysteria 2.")
+          strings.write_text(t)
+
           # Compress native Go libraries inside the APK to reduce download size.
           gradle = Path("source/app/build.gradle.kts")
           g = gradle.read_text()
