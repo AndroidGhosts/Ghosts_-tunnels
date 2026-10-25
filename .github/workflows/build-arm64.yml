@@ -85,7 +85,7 @@ jobs:
           s = s.replace(
               '# Pin the official Hysteria 2 core and its matching extras API.\n(cd core && go get ',
               '# Pin the official Hysteria 2 core and its matching extras API.\n'
-              '(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/lucas-clemente/quic-go@v0.30.0)\n'
+              '(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/apernet/quic-go@v0.32.1-0.20230226201325-e07aae1a800b)\n'
               '(cd core && go get '
           )
           p.write_text(s)
