@@ -91,15 +91,17 @@ jobs:
           target = "(cd core && go get github.com/apernet/hysteria/core/v2@v2.13.0 github.com/apernet/hysteria/extras/v2@v2.13.0 github.com/apernet/hysteria/pkg/core@v1.3.1-0.20221123081517-9eb0ea4367f3 github.com/apernet/hysteria/pkg/pktconns@v1.3.1-0.20221123081517-9eb0ea4367f3)"
           if target in s and "github.com/hashicorp/golang-lru/v2@v2.0.1" not in s:
               s = s.replace(target, target + "\n(cd core && go get github.com/hashicorp/golang-lru/v2@v2.0.1)")
-          compat = """# Keep the old Hysteria 1 ACL cache API compatible with the shared dependency graph.
-          H1_ACL_FILE="$(go env GOMODCACHE)/github.com/apernet/hysteria@v1.3.1-0.20221123081517-9eb0ea4367f3/pkg/acl/engine.go"
-          if [[ -f "$H1_ACL_FILE" ]]; then
-            sed -i 's/lru\\.ARCCache\\[cacheKey, cacheValue\\]/lru.Cache[cacheKey, cacheValue]/' "$H1_ACL_FILE"
-            sed -i 's/lru\\.NewARC\\[cacheKey, cacheValue\\](entryCacheSize)/lru.New[cacheKey, cacheValue](entryCacheSize, nil)/' "$H1_ACL_FILE"
-          else
-            echo "Hysteria 1 ACL source missing at $H1_ACL_FILE" >&2
-            exit 4
-          fi"""
+          compat = """# Copy Hysteria 1 out of Go's read-only cache and adapt its obsolete ARC calls.
+          H1_MOD_SRC="$(go env GOMODCACHE)/github.com/apernet/hysteria@v1.3.1-0.20221123081517-9eb0ea4367f3"
+          H1_MOD_DST="$PWD/core/third_party/hysteria1"
+          test -d "$H1_MOD_SRC"
+          mkdir -p "$H1_MOD_DST"
+          cp -R "$H1_MOD_SRC/." "$H1_MOD_DST/"
+          chmod -R u+w "$H1_MOD_DST"
+          H1_ACL_FILE="$H1_MOD_DST/pkg/acl/engine.go"
+          sed -i 's/lru\\.ARCCache\\[cacheKey, cacheValue\\]/lru.Cache[cacheKey, cacheValue]/' "$H1_ACL_FILE"
+          sed -i 's/lru\\.NewARC\\[cacheKey, cacheValue\\](entryCacheSize)/lru.New[cacheKey, cacheValue](entryCacheSize, nil)/' "$H1_ACL_FILE"
+          (cd core && go mod edit -replace=github.com/apernet/hysteria=./third_party/hysteria1)"""
           if "Keep the old Hysteria 1 ACL cache API compatible" not in s:
               pin = "(cd core && go get github.com/hashicorp/golang-lru/v2@v2.0.1)"
               s = s.replace(pin, pin + "\n" + compat)
