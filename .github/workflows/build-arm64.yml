@@ -75,7 +75,9 @@ jobs:
           script = Path("source/scripts/build-android-arm64.sh")
           build_script = script.read_text().replace(
               'tmp="$(mktemp app/libs/ghostcore.aar.XXXXXX)"',
-              'tmp="app/libs/ghostcore.tmp.aar"')
+              'tmp="app/libs/ghostcore.tmp.aar"').replace(
+              ' -javapkg=ghostcore',
+              '')
           script.write_text(build_script)
           PY
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
