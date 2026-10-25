@@ -84,6 +84,8 @@ jobs:
               gradle.write_text(g)
           PY
           base64 -d patches/hysteria2-engine.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
+          base64 -d patches/protocol-settings.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
+          base64 -d patches/build-tests.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
           test -f source/app/src/main/res/menu/drawer_engine.xml
 
