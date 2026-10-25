@@ -80,7 +80,7 @@ jobs:
               marker = "android {"
               if marker not in g:
                   raise SystemExit("Could not find android { block in app/build.gradle.kts")
-              g = g.replace(marker, marker + "\\n    packaging {\\n        jniLibs {\\n            useLegacyPackaging = true\\n        }\\n    }\\n", 1)
+              g = g.replace(marker, marker + "\n    packaging {\n        jniLibs {\n            useLegacyPackaging = true\n        }\n    }\n", 1)
               gradle.write_text(g)
           PY
           base64 -d patches/hysteria2-engine.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
