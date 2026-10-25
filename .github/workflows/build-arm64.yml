@@ -77,6 +77,23 @@ jobs:
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
           test -f source/app/src/main/res/menu/drawer_engine.xml
 
+      - name: Package patched source snapshot for integration verification
+        run: |
+          mkdir -p /tmp/ghosts-source-review
+          tar -czf /tmp/ghosts-source-review/source-review.tar.gz -C source \
+            app/src/main/java/com/androidghosts/dnsttghosts \
+            app/src/main/res/layout app/src/main/res/menu app/src/main/res/values app/src/main/res/values-ar \
+            app/src/main/AndroidManifest.xml app/build.gradle.kts \
+            core/go.mod core/go.sum core/engine core/ghostcore \
+            scripts/build-android-arm64.sh
+      - name: Upload patched source review snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android_Ghosts-source-review
+          path: /tmp/ghosts-source-review/source-review.tar.gz
+          if-no-files-found: error
+          retention-days: 3
+
       - name: Build native ghostcore AAR and APK
         working-directory: source
         run: ./scripts/build-android-arm64.sh
