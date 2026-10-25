@@ -86,8 +86,8 @@ jobs:
           if dep in s and "github.com/lucas-clemente/quic-go@v0.31.0" not in s:
               s = s.replace(dep, dep + " github.com/lucas-clemente/quic-go@v0.31.0")
           s = s.replace(
-              '# Pin the official Hysteria 2 core and its matching extras API.\\n(cd core && go get ',
-              '# Pin the official Hysteria 2 core and its matching extras API.\\n(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/lucas-clemente/quic-go@v0.31.0)\\n(cd core && go get ')
+              '# Pin the official Hysteria 2 core and its matching extras API.\n(cd core && go get ',
+              '# Pin the official Hysteria 2 core and its matching extras API.\n(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/lucas-clemente/quic-go@v0.31.0)\n(cd core && go get ')
           p.write_text(s)
           PY
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
