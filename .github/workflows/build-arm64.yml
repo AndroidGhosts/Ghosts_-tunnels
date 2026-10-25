@@ -63,6 +63,8 @@ jobs:
       - name: Apply Android_Ghosts UI and build fixes
         run: |
           base64 -d patches/android_ghosts_ui.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
+          base64 -d patches/hysteria2-engine.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
+          base64 -d patches/protocol-settings.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
           python3 - <<'PY'
           from pathlib import Path
           p = Path("source/app/src/main/java/com/androidghosts/dnsttghosts/ProfileEditActivity.kt")
@@ -120,8 +122,6 @@ jobs:
               g = g.replace(marker, marker + "\n    packaging {\n        jniLibs {\n            useLegacyPackaging = true\n        }\n    }\n", 1)
               gradle.write_text(g)
           PY
-          base64 -d patches/hysteria2-engine.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
-          base64 -d patches/protocol-settings.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
           base64 -d patches/config-validation.patch.gz.b64 | gzip -dc | patch --directory source -p1 --batch
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
           test -f source/app/src/main/res/menu/drawer_engine.xml
