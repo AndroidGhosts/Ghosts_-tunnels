@@ -88,6 +88,9 @@ jobs:
               '(cd core && go mod edit -replace=github.com/lucas-clemente/quic-go=github.com/apernet/quic-go@v0.31.1-0.20221119235156-55bf700f2dd4)\n'
               '(cd core && go get '
           )
+          target = "(cd core && go get github.com/apernet/hysteria/core/v2@v2.13.0 github.com/apernet/hysteria/extras/v2@v2.13.0 github.com/apernet/hysteria/pkg/core@v1.3.1-0.20221123081517-9eb0ea4367f3 github.com/apernet/hysteria/pkg/pktconns@v1.3.1-0.20221123081517-9eb0ea4367f3)"
+          if target in s and "github.com/hashicorp/golang-lru/v2@v2.0.1" not in s:
+              s = s.replace(target, target + "\\n(cd core && go get github.com/hashicorp/golang-lru/v2@v2.0.1)")
           p.write_text(s)
           PY
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
