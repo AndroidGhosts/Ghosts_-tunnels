@@ -87,6 +87,13 @@ jobs:
           chmod +x source/gradlew source/scripts/build-android-arm64.sh
           test -f source/app/src/main/res/menu/drawer_engine.xml
 
+      - name: Prepare source snapshot for protocol verification
+        run: |
+          tar -czf Android_Ghosts-source-review.tar.gz -C source \\
+            app/src/main/java app/src/main/res app/src/main/AndroidManifest.xml \\
+            app/build.gradle.kts core/engine core/ghostcore core/go.mod \\
+            scripts/build-android-arm64.sh ENGINE_STATUS.md
+
       - name: Build native ghostcore AAR and APK
         working-directory: source
         run: ./scripts/build-android-arm64.sh
@@ -98,3 +105,11 @@ jobs:
           path: source/app/build/outputs/apk/debug/*arm64-v8a*debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload protocol source snapshot for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android_Ghosts-source-review
+          path: Android_Ghosts-source-review.tar.gz
+          if-no-files-found: error
+          retention-days: 3
