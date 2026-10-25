@@ -79,7 +79,7 @@ jobs:
           script = Path("source/scripts/build-android-arm64.sh")
           build = script.read_text()
           anchor = '(cd core && go get github.com/apernet/hysteria/core/v2@v2.13.0 github.com/apernet/hysteria/extras/v2@v2.13.0)\nMOBILE_VERSION="$(cd core && go list -m -f \'{{.Version}}\' golang.org/x/mobile)"'
-          addition = anchor + "\n(cd core && go mod tidy)\n(cd core && go test ./engine ./ghostcore)"
+          addition = anchor + "\n(cd core && go mod tidy)\n(cd core && go get golang.org/x/mobile@${MOBILE_VERSION})\n(cd core && go test ./engine ./ghostcore)"
           if "go mod tidy" not in build:
               if anchor not in build:
                   raise SystemExit("Could not locate Go dependency setup in build-android-arm64.sh")
