@@ -89,9 +89,9 @@ jobs:
 
       - name: Prepare source snapshot for protocol verification
         run: |
-          tar -czf Android_Ghosts-source-review.tar.gz -C source \\
-            app/src/main/java app/src/main/res app/src/main/AndroidManifest.xml \\
-            app/build.gradle.kts core/engine core/ghostcore core/go.mod \\
+          tar -czf Android_Ghosts-source-review.tar.gz -C source \
+            app/src/main/java app/src/main/res app/src/main/AndroidManifest.xml \
+            app/build.gradle.kts core/engine core/ghostcore core/go.mod \
             scripts/build-android-arm64.sh ENGINE_STATUS.md
 
       - name: Build native ghostcore AAR and APK
