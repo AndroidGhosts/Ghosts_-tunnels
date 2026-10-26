@@ -158,7 +158,7 @@ jobs:
           AAR="source/app/libs/ghostcore.aar"
           test -f "$AAR"
           echo "Native ABIs packaged in $AAR:"
-          unzip -l "$AAR" | grep -E 'jni/(arm64-v8a|armeabi-v7a|x86_64|x86)/.*\\.so$' | tee /tmp/native-abis.txt
+          unzip -l "$AAR" | grep -E 'jni/(arm64-v8a|armeabi-v7a|x86_64|x86)/.*\.so$' | tee /tmp/native-abis.txt
           for abi in arm64-v8a armeabi-v7a x86_64 x86; do
             grep -q "jni/$abi/" /tmp/native-abis.txt || { echo "Missing native ABI in AAR: $abi"; exit 1; }
           done
