@@ -1,4 +1,4 @@
-name: Build Android_Ghosts Tunnels ARM64 APK
+name: Build Android_Ghosts Tunnels Multi-ABI APK
 
 on:
   push:
@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 jobs:
-  build-arm64:
-    name: Build ARM64 debug APK
+  build-android:
+    name: Build multi-ABI debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -132,15 +132,51 @@ jobs:
             app/build.gradle.kts core/engine core/ghostcore core/go.mod \
             scripts/build-android-arm64.sh ENGINE_STATUS.md
 
+      - name: Configure native build for all Android ABIs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("source/scripts/build-android-arm64.sh")
+          s = p.read_text()
+          # gomobile bind packages the selected Android ABIs into one AAR.
+          targets = "-target=android/arm64,android/arm,android/amd64,android/386"
+          if targets not in s:
+              old = "-target=android/arm64"
+              if old not in s:
+                  raise SystemExit("Native build script has no recognized gomobile Android target; refusing to publish a misleading multi-ABI APK.")
+              s = s.replace(old, targets)
+          p.write_text(s)
+          PY
+
       - name: Build native ghostcore AAR and APK
         working-directory: source
         run: ./scripts/build-android-arm64.sh
 
-      - name: Upload ARM64 APK
+      - name: Verify APK ABI coverage
+        run: |
+          set -e
+          APK="$(find source/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
+          test -n "$APK"
+          echo "Inspecting $APK"
+          unzip -l "$APK" | grep -E 'lib/(arm64-v8a|armeabi-v7a|x86_64|x86)/.*\.so
+
+      - name: Upload protocol source snapshot for review
         uses: actions/upload-artifact@v4
         with:
-          name: Android_Ghosts-Tunnels-ARM64-debug-APK
-          path: source/app/build/outputs/apk/debug/*arm64-v8a*debug.apk
+          name: Android_Ghosts-source-review
+          path: Android_Ghosts-source-review.tar.gz
+          if-no-files-found: error
+          retention-days: 3
+ | tee /tmp/native-abis.txt
+          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
+            grep -q "lib/$abi/" /tmp/native-abis.txt || { echo "Missing native ABI: $abi"; exit 1; }
+          done
+
+      - name: Upload multi-ABI APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android_Ghosts-Tunnels-Multi-ABI-debug-APKs
+          path: source/app/build/outputs/apk/**/*.apk
           if-no-files-found: error
           retention-days: 14
 
