@@ -152,19 +152,21 @@ jobs:
         working-directory: source
         run: ./scripts/build-android-arm64.sh
 
-      - name: Verify APK ABI coverage
+      - name: Verify native ABI coverage in AAR and APK outputs
         run: |
           set -euo pipefail
+          AAR="source/app/libs/ghostcore.aar"
+          test -f "$AAR"
+          echo "Native ABIs packaged in $AAR:"
+          unzip -l "$AAR" | grep -E 'jni/(arm64-v8a|armeabi-v7a|x86_64|x86)/.*\\.so$' | tee /tmp/native-abis.txt
+          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
+            grep -q "jni/$abi/" /tmp/native-abis.txt || { echo "Missing native ABI in AAR: $abi"; exit 1; }
+          done
           mapfile -t APKS < <(find source/app/build/outputs/apk -type f -name '*.apk' | sort)
           test "${#APKS[@]}" -gt 0
-          : > /tmp/native-abis.txt
           for APK in "${APKS[@]}"; do
-            echo "Inspecting $APK"
-            unzip -l "$APK" | grep -E 'lib/(arm64-v8a|armeabi-v7a|x86_64|x86)/.*\.so$' >> /tmp/native-abis.txt || true
-          done
-          cat /tmp/native-abis.txt
-          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
-            grep -q "lib/$abi/" /tmp/native-abis.txt || { echo "Missing native ABI across APK outputs: $abi"; exit 1; }
+            echo "Built APK: $APK"
+            ls -lh "$APK"
           done
 
       - name: Upload multi-ABI APKs
