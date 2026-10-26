@@ -1,16 +1,12 @@
 # Android_Ghosts Tunnels
 
-Experimental ARM64 Android tunnel client branded **Android_Ghosts**. The build assembles the checked-in Android source archive and applies the UI/core integration patches from `.github/workflows/build-arm64.yml`.
+Experimental Android tunnel client branded **Android_Ghosts**. The GitHub Actions workflow builds the Android app from the checked-in source archive and applies the UI/core integration patches. The workflow now requests native Go bindings for ARM64, ARMv7, x86_64 and x86, and checks that all four native library folders are present in the APK before publishing artifacts. Treat multi-ABI support as unverified until that workflow passes.
 
-## Latest verified build
+## Build status
 
-- Build: [GitHub Actions run #40217237989](https://github.com/AndroidGhosts/Ghosts_-tunnels/actions/runs/40217237989)
-- Artifact: `Android_Ghosts-Tunnels-ARM64-debug-APK`
-- APK: `app-arm64-v8a-debug.apk`
-- Size: **10,351,401 bytes (9.87 MiB)** — below 10 MiB, but slightly above 10,000,000 decimal bytes.
-- SHA-256: `bdce55eee5ae8ab8eb5fafec868a2bbe9f2d7a7d7b6c94f85c024116ae069808`
+The previous verified artifact is an ARM64-only debug APK from [GitHub Actions run #40217237989](https://github.com/AndroidGhosts/Ghosts_-tunnels/actions/runs/40217237989), 10,351,401 bytes (9.87 MiB), SHA-256 `bdce55eee5ae8ab8eb5fafec868a2bbe9f2d7a7d7b6c94f85c024116ae069808`. A workflow update now requests all four Android ABIs and fails the build if any native ABI is absent. Do not treat that as verified until the new run succeeds.
 
-The APK is a **debug build signed with the Android debug key**, intended for device testing. It is not a Play Store release. Production release signing, release validation, and a test on a real device with server credentials are still required.
+All APKs produced by this workflow are **debug builds signed with the Android debug key**, intended for device testing, not Play Store release. Release signing and real-device testing with server credentials are still required.
 
 ## Engine status
 
